@@ -143,8 +143,8 @@ if (typeof document !== "undefined") {
     $("start").disabled = state.running || state.busy || !state.apiConnected;
     $("stop").disabled = !state.running || state.busy;
     $("mode").disabled = state.running || state.busy;
-    $("sourceLockHint").hidden = !state.running && !state.busy;
-    $("sourceLockHint").textContent = state.busy ? state.running ? "正在停止并保存记录，结束后即可更换数据源。" : "正在连接数据源，请等待连接结束。" : `更换数据源：先点「${browserDemo ? "停止演示" : "停止并保存"}」，再选择数据源。暂停显示不会结束采集。`;
+    $("sourceLockHint").hidden = browserDemo || (!state.running && !state.busy);
+    $("sourceLockHint").textContent = state.busy ? state.running ? "正在停止并保存记录，结束后即可更换数据源。" : "正在连接数据源，请等待连接结束。" : "更换数据源：先点「停止并保存」，再选择数据源。暂停显示不会结束采集。";
     $("port").disabled = state.running || state.busy;
     $("refreshPorts").disabled = state.running || state.busy;
     $("eventA").disabled = $("eventB").disabled = !active;
