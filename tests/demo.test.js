@@ -1,0 +1,60 @@
+"use strict";
+const assert = require("node:assert/strict");
+const {BrowserDemo} = require("../web/transport.js");
+const DSP = require("../web/app.js");
+const Display = require("../web/display.js");
+let clock = 0;
+const demo = new BrowserDemo(()=>clock,()=>1700000000+clock/1000);
+assert.throws(()=>demo.request("/api/start",{mode:"cyton_daisy"}),/本地/);
+demo.request("/api/start",{mode:"synthetic"});
+clock=1000;
+assert.equal(demo.request("/api/status").samples,250);
+const a=demo.request("/api/marker",{value:1,label:"重复标记 A"});
+const b=demo.request("/api/marker",{value:1,label:"重复标记 B"});
+clock=1020;
+const observed=demo.request("/api/events?after=0").events.filter(e=>e.kind==="observed");
+assert.deepEqual(observed.map(e=>e.event_id),[a.event_id,b.event_id]);
+assert.deepEqual(observed.map(e=>e.observed_sample_index),[250,251]);
+const chunks=demo.request("/api/data?after=0").chunks;
+assert(chunks.every(c=>c.eeg.length===16 && c.eeg.every(ch=>ch.length===c.timestamps.length)));
+assert.equal(chunks.flatMap(c=>c.markers).filter(Boolean).length,2);
+clock=1021;
+const fractional=demo.request("/api/marker",{value:3,label:"非采样时刻请求"});
+clock=1030;
+const fractionalObserved=demo.request("/api/events?after=0").events.find(e=>e.kind==="observed" && e.event_id===fractional.event_id);
+assert(fractionalObserved.observed_at>=fractional.requested_at);
+assert.throws(()=>demo.recording(),/停止/);
+demo.request("/api/stop",{});
+assert.equal(demo.recording().blob.type,"text/csv;charset=utf-8");
+clock=2000;
+demo.request("/api/start",{mode:"synthetic"});
+const pending=demo.request("/api/marker",{value:2,label:"立即停止"});
+demo.request("/api/stop",{});
+assert(demo.events.some(e=>e.event_id===pending.event_id && e.kind==="unobserved"));
+clock=3000;
+demo.request("/api/start",{mode:"synthetic"});
+clock=604000;
+const capped=demo.request("/api/status");
+assert.equal(capped.samples,150000);
+assert.equal(capped.running,false);
+assert(demo.request("/api/data?after=0").chunks.flatMap(c=>c.timestamps).length<=7625);
+// UI work must preserve the existing numerical behavior.
+for (const rate of [125,250]) {
+ const x=Array.from({length:rate*2},(_,i)=>20*Math.sin(2*Math.PI*10*i/rate));
+ const psd=DSP.spectrum(x,rate);
+ assert.equal(psd.reduce((a,b)=>b.psd>a.psd?b:a).frequency,10);
+}
+// Large DC offsets must fit in absolute mode without changing saved sample values.
+const raw=[-187500.02235174447,-187500.02235174447];
+const copy=raw.slice();
+assert.equal(Display.analyze(raw).defaultRail,true);
+assert.equal(Display.analyze([-70000,-69999]).defaultRail,false);
+assert.equal(Display.analyze(raw).constant,true);
+assert.equal(Display.analyze([0,0]).defaultRail,false);
+assert.equal(Display.analyze([]).count,0);
+assert.equal(Display.fit([raw]),250000);
+assert.equal(Display.fit([[-70000,-69980]],true),50);
+assert.equal(Display.fit([raw],true),50);
+assert.equal(Display.analyze(raw).defaultRail,true); // Centering must not hide the raw saturation check.
+assert.deepEqual(raw,copy);
+console.log("PASS: browser demo lifecycle, marker matching, CSV download, memory cap, existing PSD, raw display range");

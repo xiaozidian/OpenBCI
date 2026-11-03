@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cyton + Daisy 16 通道研究工作台：实时波形、频谱、软件事件与视觉刺激。支持浏览器模拟演示和本地硬件采集。">
+  <meta name="theme-color" content="#f6f7f4"><title>OpenBCI 研究工作台 · 采集与实验</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
+  <script src="./transport.js" defer></script><script src="./display.js" defer></script><script src="./app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到工作区</a>
+<header class="topbar">
+  <a class="identity" href="./" aria-label="OpenBCI 研究工作台首页"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M3 17h6l3-9 5 17 4-12 2 4h6"/></svg></span><span class="brand-copy"><strong>OpenBCI<span>研究工作台</span></strong><small>ACQUISITION & EXPERIMENT</small></span></a>
+  <nav class="view-nav" aria-label="工作区导航"><button class="view-tab active" data-view="acquisition" aria-current="page">实时采集</button><button class="view-tab" data-view="experiment">实验与事件 <span id="navEventCount" class="nav-count">0</span></button><button class="view-tab" data-view="guide">使用与分发</button></nav>
+  <div class="topbar-end"><span id="environmentLabel" class="environment-label">本地工作台</span><div class="session-badge" id="sessionBadge" role="status"><i aria-hidden="true"></i><span id="sessionState">连接服务中</span></div></div>
+</header>
+<main id="main" class="workspace">
+  <div class="page-intro"><div><p class="eyebrow">SIGNAL WORKSPACE / 01</p><h1 id="viewTitle">从连接到信号。</h1><p id="viewDescription">查看实时波形，确认数据状态，再开始实验。</p></div><a class="quiet-link" href="./guide.html">快速上手 ↗</a></div>
+  <div id="browserBanner" class="environment-banner" hidden><span class="banner-symbol" aria-hidden="true">◌</span><div><strong>浏览器模拟演示</strong><p>无需安装即可体验。数据由浏览器生成；连接真实板，请下载并启动本地工作台。</p></div><a class="text-button" href="./guide.html#local">连接真实板 ↗</a></div>
+  <div class="workspace-grid">
+    <aside class="sidebar" aria-label="采集连接与记录">
+      <section class="connection-panel">
+        <div class="section-heading"><span class="section-index">01</span><h2>采集连接</h2><span class="live-label" id="connectionModeLabel">准备就绪</span></div>
+        <label for="mode">数据源</label><select id="mode"><option value="synthetic">模拟信号 · 无需硬件</option><option value="cyton_daisy">Cyton + Daisy · 真实板卡</option></select>
+        <div id="portControls" hidden><label for="port">USB 接收器</label><div class="port-row"><select id="port"><option value="">尚未扫描</option></select><button id="refreshPorts" class="icon-button" title="重新扫描串口" aria-label="重新扫描串口"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8a6 6 0 1 0 .1 4M16 3v5h-5"/></svg></button></div></div>
+        <p class="help" id="modeHelp">使用模拟数据熟悉波形、记录和事件操作。</p>
+        <div class="acquisition-actions"><button class="primary full" id="start"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg><span>开始采集</span></button><button class="stop-button full" id="stop" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="5" width="10" height="10" rx="1"/></svg>停止并保存</button></div>
+        <div class="connection-steps" aria-label="连接过程"><span id="stepService"><i></i>服务</span><span id="stepDevice"><i></i>数据源</span><span id="stepStream"><i></i>数据流</span></div>
+        <div class="inline-notice" id="notice" role="status" aria-live="polite">正在检查采集服务…</div>
+      </section>
+      <section class="session-panel"><div class="section-heading"><span class="section-index">02</span><h2>本次记录</h2></div><div class="record-state"><span class="record-dot" id="recordDot"></span><strong id="recordState">尚未开始</strong></div><p id="recordingPath" class="recording-path">开始采集后创建独立记录。</p><button id="downloadRecording" class="secondary full" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9m-4-4 4 4 4-4M4 14v3h12v-3"/></svg>下载采集记录</button><p class="help" id="recordHelp">本地采集自动保存原始数据；停止后可下载完整记录。</p><div class="storage-note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 2.5 3v4c0 3 5.5 6.5 5.5 6.5S13.5 10 13.5 7V3Z"/><path d="m5.5 7 1.7 1.7L11 5"/></svg><span>采集数据保留在当前设备</span></div></section>
+      <a class="sidebar-guide" href="./guide.html#hardware"><span>初次连接真实板？<small>查看 Cyton + Daisy 接线与准备步骤</small></span><span aria-hidden="true">↗</span></a>
+    </aside>
+    <div class="main-column">
+      <div class="session-strip" aria-label="采集概况"><div><span>当前数据源</span><strong id="sourceSummary">模拟信号</strong></div><div><span>采样率</span><strong id="sampleRate">250 <small>Hz</small></strong></div><div><span>通道</span><strong id="channelCount">16 <small>CH</small></strong></div><div><span>记录时长</span><strong id="sessionDuration">00:00</strong></div><div><span>已记录样本</span><strong id="sampleCount">0</strong></div></div>
+      <div class="view-panel" data-panel="acquisition">
+        <section class="panel waveform-panel" aria-labelledby="waveTitle">
+          <div class="panel-header"><div><p class="eyebrow">TIME SERIES</p><h2 id="waveTitle">16 通道波形 <span class="live-indicator" id="waveLive">等待数据</span></h2></div><button id="pauseDisplay" class="secondary compact" aria-pressed="false" disabled><span id="pauseLabel">暂停显示</span></button></div>
+          <div class="display-toolbar" aria-label="波形显示设置"><label>显示滤波<select id="filter"><option value="raw">原始信号</option><option value="bandpass" selected>1–40 Hz 带通</option></select></label><label class="check-row"><input type="checkbox" id="notch" checked><span>50 Hz 陷波</span></label><span class="toolbar-spacer"></span><label>量程<select id="scale"><option value="50">±50 μV</option><option value="100">±100 μV</option><option value="200" selected>±200 μV</option><option value="500">±500 μV</option><option value="1000">±1000 μV</option><option value="5000">±5 mV</option><option value="20000">±20 mV</option><option value="100000">±100 mV</option><option value="250000">±250 mV</option></select></label><label>时间窗<select id="timeWindow"><option value="4">4 秒</option><option value="8" selected>8 秒</option></select></label></div>
+          <div class="plot-options"><label class="check-row" title="仅绘图时减去各通道当前时间窗的均值；均值显示在通道名下，原始数据和频谱不变。"><input type="checkbox" id="centerRaw"><span>原始信号居中显示</span></label><span>通道下方为绘图窗内均值；记录保留原值</span><button id="fitSignal" class="secondary compact" disabled>适应信号</button></div>
+          <div class="plot-caption"><div class="channel-legend"><span><i></i>Cyton · CH 01–08</span><span><i></i>Daisy · CH 09–16</span></div><span id="filterBadge">1–40 Hz + 50 Hz 陷波</span></div>
+          <div id="streamNotice" class="signal-notice" role="status" hidden>最近 3 秒未收到新样本。请检查板子供电、PC 开关和接收器；界面保留最后收到的数据。</div><div id="rangeNotice" class="signal-notice" role="status" hidden></div>
+          <div class="waveform-wrap"><canvas id="waveform" aria-label="16 通道实时 EEG 波形图，可点击通道选择频谱"></canvas><div class="plot-empty" id="waveEmpty"><span class="empty-wave" aria-hidden="true"><svg viewBox="0 0 140 40"><path d="M0 20h35l8-8 9 20 12-30 15 36 9-18h52"/></svg></span><strong id="emptyTitle">信号，从这里开始</strong><span id="emptyDescription">选择左侧数据源，点击「开始采集」。</span></div><div class="paused-overlay" id="pausedOverlay" hidden>显示已暂停 · 后台采集保持运行</div></div>
+          <div class="plot-footer"><span id="sampleTime">最新样本：—</span><span id="receivedTime">本机接收：—</span><span>仅显示滤波 · 原始记录保持不变</span></div>
+        </section>
+        <section class="panel spectrum-panel" aria-labelledby="spectrumTitle"><div class="panel-header"><div><p class="eyebrow">POWER SPECTRUM</p><h2 id="spectrumTitle">功率谱密度</h2></div><label class="channel-picker">分析通道<select id="spectrumChannel" aria-label="选择频谱通道"></select></label></div><div class="spectrum-body"><div class="spectrum-wrap"><canvas id="spectrum" aria-label="所选通道功率谱密度图"></canvas></div><aside class="spectrum-explainer"><span class="micro-label">READING THE SIGNAL</span><h3>频率里的信号</h3><p>横轴是频率，纵轴是功率谱密度。某一频率的峰越高，表示这段数据中该频率的能量越集中。</p><p class="help">频谱跟随当前显示滤波。模拟信号中的峰不能用于判断人的脑活动。</p></aside></div><p class="spectrum-note" id="spectrumNote">最近 2 秒 · Hann 窗 · 等待完整数据窗</p></section>
+        <details class="method-note"><summary>显示滤波与时间的含义</summary><p>1–40 Hz 是一阶高通与低通串联的演示滤波；50 Hz 陷波 Q=30。它们只影响显示与频谱，不改变原始记录。Cyton + Daisy 时间戳为主机接收／合并时间；正式研究需另行验证滤波、信号质量和同步精度。</p></details>
+      </div>
+      <div class="view-panel" data-panel="experiment" hidden>
+        <section class="panel experiment-panel"><div class="panel-header"><div><p class="eyebrow">STIMULUS & MARKERS</p><h2>视觉刺激与事件标记</h2></div><span class="tag">软件时序</span></div><div class="experiment-body"><div class="stimulus" id="stimulus" aria-label="视觉刺激区域"><span>+</span><small id="stimulusState">待机</small></div><div class="event-controls"><p class="control-label">手动事件</p><div class="button-row"><button id="eventA" class="secondary" disabled>事件 A <kbd>1</kbd></button><button id="eventB" class="secondary" disabled>事件 B <kbd>2</kbd></button></div><p class="help keyboard-hint">空格键发送事件 A · 输入控件聚焦时不触发</p><div class="paradigm-inputs"><label for="stimulusInterval">刺激间隔 / 秒<input id="stimulusInterval" type="number" min="0.5" max="60" step="0.5" value="2"></label><label for="stimulusCount">重复次数<input id="stimulusCount" type="number" min="1" max="100" step="1" value="5"></label></div><div class="button-row"><button id="startExperiment" class="primary" disabled>运行视觉刺激</button><button id="cancelExperiment" class="secondary" disabled>取消</button></div><p class="experiment-readiness" id="experimentReadiness">请先开始采集，再添加事件。</p></div></div><p class="timing-note">准备 1 秒后开始，每次闪烁 150 ms 并请求事件 A。切换工作区或将页面放到后台会取消剩余刺激。软件时间不代表屏幕实际亮起时间或硬件同步精度。</p></section>
+        <section class="panel event-log-panel"><div class="panel-header"><div><p class="eyebrow">EVENT TIMELINE</p><h2>实验日志 <span id="eventCount">0</span></h2></div><button class="secondary compact" id="exportLog" disabled>导出事件日志</button></div><div class="table-wrap"><table><thead><tr><th scope="col">事件</th><th scope="col">计划 / 本机时间</th><th scope="col">绘制回调差</th><th scope="col">请求发送时间</th><th scope="col">采集端状态</th></tr></thead><tbody id="eventRows"><tr><td colspan="5" class="table-empty"><strong>给数据加上时间坐标</strong><span>采集开始后，发送手动事件或运行视觉刺激，事件状态会在这里更新。</span></td></tr></tbody></table></div><p class="log-note">显示最近 30 条；导出包含本页全部事件与后端状态。刷新页面前请先导出。</p></section>
+      </div>
+      <div class="view-panel" data-panel="guide" hidden>
+        <section class="guide-intro"><p class="eyebrow">START HERE</p><h2>同一个工作台，两种打开方式。</h2><p>先用模拟数据熟悉流程，再连接真实设备。</p></section>
+        <div class="guide-modes"><article><span class="guide-number">01 / 在浏览器体验</span><h3>打开链接，开始模拟采集。</h3><p>GitHub Pages 版在浏览器生成 16 通道模拟数据，可查看波形与频谱、运行视觉刺激，并下载演示数据和事件日志。</p><button class="primary" id="goAcquisition">返回实时采集 →</button></article><article><span class="guide-number">02 / 在本机连接硬件</span><h3>下载工作台，接入真实板。</h3><p>本地采集服务负责连接 USB 接收器与保存原始记录。需要 Python 3.10+，以及提供 Java / BrainFlow 库的 OpenBCI GUI。</p><a class="secondary link-button" href="./downloads/OpenBCI-Research-Workbench.zip" download>下载本地工作台 ↓</a><a class="quiet-link" href="./guide.html#local">安装步骤 ↗</a></article></div>
+        <div class="workflow-guide"><h3>一次完整采集</h3><ol><li><strong>连接与检查</strong><span>选择数据源。真实板需插入 USB 接收器，板子用电池供电并置于 PC。</span></li><li><strong>观察与实验</strong><span>开始采集，调整显示。进入「实验与事件」添加标记或运行视觉刺激。</span></li><li><strong>停止与导出</strong><span>点击「停止并保存」，下载采集记录和事件日志，保留实验配置。</span></li></ol></div><a class="quiet-link" href="./guide.html#publish">GitHub 同步与自动发布说明 ↗</a>
+      </div>
+    </div>
+  </div>
+</main>
+<footer class="app-footer"><span>OpenBCI 研究工作台 <span class="footer-dot">·</span> 社区学术原型，与 OpenBCI 官方 GUI 独立</span><span id="connectionStatus">正在连接本地服务</span></footer>
+<div id="downloadStatus" class="toast" role="status" aria-live="polite" hidden></div>
+</body></html>

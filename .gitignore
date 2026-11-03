@@ -1,0 +1,16 @@
+__pycache__/
+.runtime/
+recordings/
+.DS_Store
+dist/
+web/downloads/
+research/
+test_result.json
+ui_test_result.json
+verification*.json
+*.dmg
+*.zip
+.venv/
+.env
+.env.*
+!.env.example
