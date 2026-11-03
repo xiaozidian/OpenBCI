@@ -2,6 +2,8 @@
 
 面向 **Cyton + Daisy** 的 16 通道学术工作台。把采集、波形与频谱、视觉刺激和事件日志放在一个浏览器界面中。独立社区原型，与 OpenBCI 官方 GUI 分开维护。
 
+界面采用清华紫主色，校徽与校名使用项目所有者提供的原始图片；软件源码和品牌图像的权利说明见 [第三方组件说明](THIRD_PARTY_NOTICES.md)。
+
 [打开在线模拟工作台](https://xiaozidian.github.io/OpenBCI/) · [下载本地工作台](https://xiaozidian.github.io/OpenBCI/downloads/OpenBCI-Research-Workbench.zip) · [使用说明](https://xiaozidian.github.io/OpenBCI/guide.html)
 
 ## 选择打开方式

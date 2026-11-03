@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Cyton + Daisy 16 通道研究工作台：实时波形、频谱、软件事件与视觉刺激。支持浏览器模拟演示和本地硬件采集。">
-  <meta name="theme-color" content="#f6f7f4"><title>OpenBCI 研究工作台 · 采集与实验</title>
+  <meta name="theme-color" content="#faf7fc"><title>OpenBCI 研究工作台 · 采集与实验</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
   <script src="./transport.js" defer></script><script src="./display.js" defer></script><script src="./app.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">跳到工作区</a>
 <header class="topbar">
-  <a class="identity" href="./" aria-label="OpenBCI 研究工作台首页"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M3 17h6l3-9 5 17 4-12 2 4h6"/></svg></span><span class="brand-copy"><strong>OpenBCI<span>研究工作台</span></strong><small>ACQUISITION & EXPERIMENT</small></span></a>
+  <a class="identity" href="./" aria-label="OpenBCI 研究工作台首页"><span class="tsinghua-logo"><img src="./tsinghua-logo.png" alt="清华大学 Tsinghua University 校徽与校名" width="763" height="330"></span><span class="brand-copy"><strong>OpenBCI<span>研究工作台</span></strong><small>ACQUISITION & EXPERIMENT</small></span></a>
   <nav class="view-nav" aria-label="工作区导航"><button class="view-tab active" data-view="acquisition" aria-current="page">实时采集</button><button class="view-tab" data-view="experiment">实验与事件 <span id="navEventCount" class="nav-count">0</span></button><button class="view-tab" data-view="guide">使用与分发</button></nav>
   <div class="topbar-end"><span id="environmentLabel" class="environment-label">本地工作台</span><div class="session-badge" id="sessionBadge" role="status"><i aria-hidden="true"></i><span id="sessionState">连接服务中</span></div></div>
 </header>

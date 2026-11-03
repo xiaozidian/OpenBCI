@@ -177,7 +177,7 @@ if (typeof document !== "undefined") {
     $("fitSignal").disabled = state.viewPaused || !state.count;
     $("emptyTitle").textContent = state.phase === "error" ? "连接未建立" : state.phase === "starting" ? "正在连接数据源" : !state.apiConnected ? "等待本地采集服务" : "信号，从这里开始";
     $("emptyDescription").textContent = state.phase === "starting" ? "正在准备采集，请稍候。" : !state.apiConnected ? "请先启动本地工作台，再重新连接。" : "选择左侧数据源，点击「开始采集」。";
-    $("experimentReadiness").textContent = active ? "采集已就绪，可以发送事件或运行视觉刺激。" : "请先开始采集，再添加事件。";
+    $("experimentReadiness").textContent = waiting ? "正在等待新数据。请恢复数据流后再运行实验；此时发送的事件需等待后续样本。" : active ? "采集已就绪，可以发送事件或运行视觉刺激。" : "请先开始采集，再添加事件。";
     $("exportLog").disabled = !state.events.length && !state.remoteEvents.length;
     updateDuration();
   }
@@ -441,9 +441,9 @@ if (typeof document !== "undefined") {
     ctx.font = "9px SFMono-Regular, Consolas, monospace";
     for (let second = 0; second <= seconds; second++) {
       const x = left + plotWidth * second / seconds;
-      ctx.strokeStyle = "#eef1e9"; ctx.lineWidth = 1;
+      ctx.strokeStyle = "#eee7f2"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, height - bottom); ctx.stroke();
-      ctx.fillStyle = "#98a28d"; ctx.textAlign = second === seconds ? "right" : "center";
+      ctx.fillStyle = "#9c8aa5"; ctx.textAlign = second === seconds ? "right" : "center";
       ctx.fillText(second === seconds ? "0 s" : `−${seconds - second}`, x, height - 7);
     }
     const variant = variantIndex();
@@ -459,17 +459,17 @@ if (typeof document !== "undefined") {
       if (rail) railChannels++;
       if (rawStats.constant) constantChannels++;
       const y = top + rowHeight * (ch + 0.5);
-      if (ch === Number($("spectrumChannel").value)) { ctx.fillStyle = "#f2f5ee"; ctx.fillRect(left,top+rowHeight*ch,plotWidth,rowHeight); }
-      ctx.textAlign = "left"; ctx.fillStyle = ch < 8 ? "#67816a" : "#9b926e";
+      if (ch === Number($("spectrumChannel").value)) { ctx.fillStyle = "#f4eef7"; ctx.fillRect(left,top+rowHeight*ch,plotWidth,rowHeight); }
+      ctx.textAlign = "left"; ctx.fillStyle = ch < 8 ? "#795a83" : "#9980a6";
       ctx.font="9px SFMono-Regular, Consolas, monospace";
       ctx.fillText(`CH ${String(ch + 1).padStart(2, "0")}`, 10, y - 2);
       ctx.font="7px SFMono-Regular, Consolas, monospace";
-      ctx.fillStyle=rail?"#ae7846":"#9aa28f";
+      ctx.fillStyle=rail?"#ae7846":"#a28fa9";
       ctx.fillText(stats.count?ResearchDisplay.voltage(stats.mean):"",10,y+9);
-      ctx.strokeStyle = "#edf0e7"; ctx.lineWidth = 0.7;
+      ctx.strokeStyle = "#eee7f2"; ctx.lineWidth = 0.7;
       ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(width - right, y); ctx.stroke();
       ctx.save(); ctx.beginPath(); ctx.rect(left, y-rowHeight*.44, plotWidth, rowHeight*.88); ctx.clip();
-      ctx.strokeStyle = ch < 8 ? "#4b7457" : "#a1935d"; ctx.lineWidth = 1.1;
+      ctx.strokeStyle = ch < 8 ? "#660874" : "#9a78b0"; ctx.lineWidth = 1.1;
       ctx.beginPath(); let penDown = false;
       for (let i = 0; i < values.length; i++) {
         if (!Number.isFinite(values[i])) { penDown = false; continue; }
@@ -480,7 +480,7 @@ if (typeof document !== "undefined") {
       ctx.stroke(); ctx.restore();
       if (clipped) { ctx.font="8px -apple-system, sans-serif"; ctx.fillStyle="#a97545"; ctx.textAlign="right"; ctx.fillText("超量程",width-right-4,y-4); }
     }
-    const message=railChannels ? `${railChannels} 个通道接近默认输入量程边界（约 ±187.5 mV）。当前输入已饱和，滤波或居中不能恢复有效信号；请检查电极、参考与 BIAS。` : clippedChannels ? `${clippedChannels} 个通道超出当前显示量程。点击「适应信号」可显示绝对电压；开启「原始信号居中显示」可观察偏置附近的变化。` : constantChannels && state.count>state.sampleRate ? `${constantChannels} 个通道当前数值恒定。平线只表示没有数值变化，不代表输入质量正常。` : "";
+    const message=railChannels ? `${railChannels} 个通道接近默认输入量程边界（约 ±187.5 mV）。当前输入已饱和，滤波或居中不能恢复有效信号；请检查电极、参考与 BIAS。` : clippedChannels ? `${clippedChannels} 个通道超出当前显示量程。点击「适应信号」可调整量程；开启「原始信号居中显示」可观察偏置附近的变化。` : constantChannels && state.count>state.sampleRate ? `${constantChannels} 个通道当前数值恒定。平线只表示没有数值变化，不代表输入质量正常。` : "";
     $("rangeNotice").hidden=!message;
     if ($("rangeNotice").textContent!==message) $("rangeNotice").textContent=message;
   }
@@ -497,21 +497,21 @@ if (typeof document !== "undefined") {
     const maxDb = relevant ? Math.max(...relevant.map(bin => bin.db)) : 20;
     const ceiling = Math.max(-20, Math.ceil(maxDb / 10) * 10), floor = ceiling - 70;
     ctx.font = "9px SFMono-Regular, Consolas, monospace";
-    ctx.fillStyle = "#7b8d9c"; ctx.fillText("dB re 1 μV²/Hz", left, 11);
+    ctx.fillStyle = "#887792"; ctx.fillText("dB re 1 μV²/Hz", left, 11);
     for (let i = 0; i <= 7; i++) {
       const y = top + h * i / 7;
-      ctx.strokeStyle = "#e9eef2"; ctx.lineWidth = 1;
+      ctx.strokeStyle = "#eee7f2"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(width - right, y); ctx.stroke();
-      ctx.textAlign = "right"; ctx.fillStyle = "#8193a1"; ctx.fillText(String(ceiling - i * 10), left - 9, y + 3);
+      ctx.textAlign = "right"; ctx.fillStyle = "#94829e"; ctx.fillText(String(ceiling - i * 10), left - 9, y + 3);
     }
     for (let frequency = 0; frequency <= maxFrequency; frequency += 10) {
       const x = left + frequency / maxFrequency * w;
-      ctx.textAlign = "center"; ctx.fillStyle = "#8193a1"; ctx.fillText(String(frequency), x, height - 13);
+      ctx.textAlign = "center"; ctx.fillStyle = "#94829e"; ctx.fillText(String(frequency), x, height - 13);
     }
     ctx.textAlign = "right"; ctx.fillText("Hz", width - 2, height - 13);
     if (relevant) {
       ctx.save(); ctx.beginPath(); ctx.rect(left, top, w, h); ctx.clip();
-      ctx.strokeStyle = "#4f7555"; ctx.lineWidth = 1.6; ctx.beginPath();
+      ctx.strokeStyle = "#660874"; ctx.lineWidth = 1.6; ctx.beginPath();
       relevant.forEach((bin, i) => {
         const x = left + bin.frequency / maxFrequency * w, y = top + (ceiling - bin.db) / (ceiling - floor) * h;
         if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y);
@@ -519,7 +519,7 @@ if (typeof document !== "undefined") {
       ctx.stroke(); ctx.restore();
       $("spectrumNote").textContent = `最近 2 秒 · Hann 窗 · ${state.sampleRate / n} Hz 分辨率 · PSD：μV²/Hz（对数显示）`;
     } else {
-      ctx.fillStyle = "#8a9aa8"; ctx.textAlign = "center"; ctx.font = "11px -apple-system, sans-serif";
+      ctx.fillStyle = "#a08faa"; ctx.textAlign = "center"; ctx.font = "11px -apple-system, sans-serif";
       ctx.fillText(state.count >= n ? "数据窗存在间断，等待连续样本" : "等待连续 2 秒数据", left + w / 2, top + h / 2);
       $("spectrumNote").textContent = "最近 2 秒 · Hann 窗 · 等待完整数据窗";
     }

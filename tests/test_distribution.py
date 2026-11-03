@@ -21,6 +21,7 @@ class DistributionTests(unittest.TestCase):
         files = [p.relative_to(ROOT).as_posix() for p in source_files()]
         self.assertIn('LICENSE', files)
         self.assertIn('web/transport.js', files)
+        self.assertIn('web/tsinghua-logo.png', files)
         self.assertTrue(all(not p.startswith(('recordings/', 'research/', '.runtime/', 'web/downloads/')) for p in files))
         with tempfile.TemporaryDirectory() as folder:
             output = build(Path(folder) / 'workbench.zip')

@@ -13,7 +13,7 @@ def source_files():
     for name in TOP_FILES:
         path = ROOT / name
         if path.is_file(): yield path
-    for directory, patterns in (("web", ("*.html", "*.css", "*.js", "*.svg", ".nojekyll")),
+    for directory, patterns in (("web", ("*.html", "*.css", "*.js", "*.svg", "tsinghua-logo.png", ".nojekyll")),
                                 ("backend", ("*.java",)), ("scripts", ("*.py",)),
                                 ("tests", ("*.py", "*.js")), ("docs", ("*.md",)),
                                 (".github/workflows", ("*.yml",))):
