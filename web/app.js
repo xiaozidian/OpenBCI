@@ -128,7 +128,7 @@ if (typeof document !== "undefined") {
   }
   async function api(path, body) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), path === "/api/start" ? 45000 : 10000);
+    const timeout = setTimeout(() => controller.abort(), path === "/api/start" ? 45000 : path === "/api/stop" ? 30000 : 10000);
     try {
       return await ResearchTransport.request(path, body, controller.signal);
     } catch (error) {
@@ -139,30 +139,33 @@ if (typeof document !== "undefined") {
   function updateControls() {
     const active = state.running && !state.busy && state.apiConnected && state.phase === "running";
     const waiting = active && Date.now()/1000 - (state.lastReceivedAt || state.sessionStartedAt || Date.now()/1000) > 3;
+    const phaseLabel = phaseLabels[state.busy ? state.running ? "stopping" : "starting" : state.phase] || state.phase;
     $("start").disabled = state.running || state.busy || !state.apiConnected;
     $("stop").disabled = !state.running || state.busy;
     $("mode").disabled = state.running || state.busy;
+    $("sourceLockHint").hidden = !state.running && !state.busy;
+    $("sourceLockHint").textContent = state.busy ? state.running ? "正在停止并保存记录，结束后即可更换数据源。" : "正在连接数据源，请等待连接结束。" : `更换数据源：先点「${browserDemo ? "停止演示" : "停止并保存"}」，再选择数据源。暂停显示不会结束采集。`;
     $("port").disabled = state.running || state.busy;
     $("refreshPorts").disabled = state.running || state.busy;
     $("eventA").disabled = $("eventB").disabled = !active;
     $("startExperiment").disabled = !active || !!state.experiment;
     $("cancelExperiment").disabled = !state.experiment;
     $("stimulusInterval").disabled = $("stimulusCount").disabled = !!state.experiment;
-    $("sessionBadge").classList.toggle("running", state.running && state.apiConnected && !waiting);
+    $("sessionBadge").classList.toggle("running", active && !waiting);
     $("sessionBadge").classList.toggle("waiting", waiting);
     $("sessionBadge").classList.toggle("error", state.phase === "error");
-    $("sessionState").textContent = state.apiConnected ? `${browserDemo ? "模拟演示" : modeLabels[state.mode] || state.mode} · ${waiting ? "等待新数据" : phaseLabels[state.phase] || state.phase}` : "本地服务未连接";
+    $("sessionState").textContent = state.apiConnected ? `${browserDemo ? "模拟演示" : modeLabels[state.mode] || state.mode} · ${waiting ? "等待新数据" : phaseLabel}` : "本地服务未连接";
     $("sampleRate").innerHTML = `${state.sampleRate} <small>Hz</small>`;
     $("channelCount").innerHTML = `${state.channels} <small>CH</small>`;
     $("waveEmpty").hidden = state.count > 0;
     $("sampleCount").textContent = state.totalSamples.toLocaleString();
     $("sourceSummary").textContent = browserDemo ? "浏览器模拟" : modeLabels[state.mode] || state.mode;
-    $("connectionModeLabel").textContent = state.apiConnected ? phaseLabels[state.phase] : "待连接";
+    $("connectionModeLabel").textContent = state.apiConnected ? waiting ? "等待新数据" : phaseLabel : "待连接";
     $("stepService").classList.toggle("ready", state.apiConnected);
     $("stepDevice").classList.toggle("ready", state.apiConnected && state.phase === "running");
     $("stepStream").classList.toggle("ready", active && !waiting && state.count > 0);
     $("streamNotice").hidden = !waiting;
-    $("recordDot").classList.toggle("active", active);
+    $("recordDot").classList.toggle("active", active && !waiting);
     $("recordState").textContent = state.busy ? state.running ? "正在保存记录" : "正在准备记录" : state.phase === "starting" ? "正在准备记录" : state.phase === "stopping" ? "正在关闭记录" : waiting ? "等待新样本" : active ? browserDemo ? "演示数据暂存中" : "原始数据保存中" : state.recording ? "采集记录已保留" : "尚未开始";
     $("downloadRecording").disabled = state.running || state.busy || !state.recording || !state.totalSamples || !state.apiConnected;
     $("pauseDisplay").disabled = !state.count || state.view !== "acquisition";

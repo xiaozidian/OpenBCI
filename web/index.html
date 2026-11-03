@@ -21,7 +21,7 @@
     <aside class="sidebar" aria-label="采集连接与记录">
       <section class="connection-panel">
         <div class="section-heading"><span class="section-index">01</span><h2>采集连接</h2><span class="live-label" id="connectionModeLabel">准备就绪</span></div>
-        <label for="mode">数据源</label><select id="mode"><option value="synthetic">模拟信号 · 无需硬件</option><option value="cyton_daisy">Cyton + Daisy · 真实板卡</option></select>
+        <label for="mode">数据源</label><select id="mode" aria-describedby="sourceLockHint"><option value="synthetic">模拟信号 · 无需硬件</option><option value="cyton_daisy">Cyton + Daisy · 真实板卡</option></select><p id="sourceLockHint" class="help source-lock-hint" hidden>更换数据源：先点「停止并保存」，再选择模拟信号。暂停显示不会结束采集。</p>
         <div id="portControls" hidden><label for="port">USB 接收器</label><div class="port-row"><select id="port"><option value="">尚未扫描</option></select><button id="refreshPorts" class="icon-button" title="重新扫描串口" aria-label="重新扫描串口"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8a6 6 0 1 0 .1 4M16 3v5h-5"/></svg></button></div></div>
         <p class="help" id="modeHelp">使用模拟数据熟悉波形、记录和事件操作。</p>
         <div class="acquisition-actions"><button class="primary full" id="start"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg><span>开始采集</span></button><button class="stop-button full" id="stop" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="5" width="10" height="10" rx="1"/></svg>停止并保存</button></div>
